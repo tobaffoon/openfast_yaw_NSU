@@ -1,7 +1,7 @@
 
 FAST Summary File
 
-Predictions were generated on 10-May-2024 at 02:43:54 using OpenFAST, compiled as a 64-bit application using single precision at commit Текущая5fc3108c-dirty
+Predictions were generated on 10-May-2024 at 03:18:10 using OpenFAST, compiled as a 64-bit application using single precision at commit Текущая5fc3108c-dirty
   compiled with
     NWTC Subroutine Library
     ElastoDyn
@@ -33,12 +33,12 @@ Number of correction iterations:  0
   -------------------------------------------------
   Component          Time Step (s)    Subcycles (-)
   -----------------  ---------------  -------------
-  FAST (glue code)    6.250E-03
-  InflowWind          6.250E-03              1
-  ElastoDyn           6.250E-03              1
-  AeroDyn             6.250E-03              1
-  ServoDyn            6.250E-03              1
-  FAST output files   6.250E-03              1
+  FAST (glue code)    1.250E-03
+  InflowWind          1.250E-03              1
+  ElastoDyn           1.250E-03              1
+  AeroDyn             1.250E-03              1
+  ServoDyn            1.250E-03              1
+  FAST output files   1.250E-03              1
 
 
    Requested Channels in FAST Output File(s)  
