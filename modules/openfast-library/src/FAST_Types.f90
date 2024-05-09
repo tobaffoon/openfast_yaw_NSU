@@ -790,6 +790,7 @@ IMPLICIT NONE
     TYPE(IceFloe_Data)  :: IceF      !< Data for the IceFloe module [-]
     TYPE(IceDyn_Data)  :: IceD      !< Data for the IceDyn module [-]
     TYPE(ExtPtfm_Data)  :: ExtPtfm      !< Data for the ExtPtfm (external platform loading) module [-]
+    TYPE(YawControlData) :: YawCntDat   !< Yaw control research parameters
   END TYPE FAST_TurbineType
 ! =======================
 CONTAINS

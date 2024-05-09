@@ -83,6 +83,13 @@ IMPLICIT NONE
     CHARACTER(6)  :: RNG_type 
   END TYPE NWTC_RandomNumber_ParameterType
 ! =======================
+! =========  YawControlData  =======
+  TYPE, PUBLIC :: YawControlData
+      INTEGER(IntKi)  :: Strategy
+      REAL(ReKi)  :: YawErrorDelta 
+      REAL(ReKi)  :: WindDelta 
+  END TYPE YawControlData
+! =======================
 CONTAINS
 
 !=======================================================================

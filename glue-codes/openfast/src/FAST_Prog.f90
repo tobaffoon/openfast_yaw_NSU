@@ -52,7 +52,15 @@ CHARACTER(1000)                       :: InputFile                              
 CHARACTER(1024)                       :: CheckpointRoot                          ! Rootname of the checkpoint file
 CHARACTER(20)                         :: FlagArg                                 ! flag argument from command line
 INTEGER(IntKi)                        :: Restart_step                            ! step to start on (for restart) 
-
+    
+    ! vars for input yaw control research parameters
+INTEGER, parameter                    :: read_unit = 99
+CHARACTER(1024), parameter            :: YawControlFile = 'yaw_control_params.dat'
+INTEGER                               :: YawControlStrategy
+INTEGER, parameter                    :: YawErrorStrat = 0
+INTEGER, parameter                    :: WindDeltaStrat = 1
+real(ReKi)                            :: InYawErrorDelta = -1
+real(ReKi)                            :: InWindDelta = -1
 
       !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       ! determine if this is a restart from checkpoint
@@ -118,7 +126,14 @@ INTEGER(IntKi)                        :: Restart_step                           
    !...............................................................................................................................
    ! Time Stepping:
    !...............................................................................................................................         
-   
+    open(unit=read_unit, file=YawControlFile, status = 'old')
+    read(read_unit, *) YawControlStrategy
+    if (YawControlStrategy == YawErrorStrat) then
+        read(read_unit, *) InYawErrorDelta
+    else if (YawControlStrategy == WindDeltaStrat) then
+        read(read_unit, *) InWindDelta
+    end if
+    close(read_unit)
 TIME_STEP_LOOP:  DO n_t_global = Restart_step, Turbine(1)%p_FAST%n_TMax_m1 
       
       ! bjj: we have to make sure the n_TMax_m1 and n_ChkptTime are the same for all turbines or have some different logic here
@@ -139,7 +154,9 @@ TIME_STEP_LOOP:  DO n_t_global = Restart_step, Turbine(1)%p_FAST%n_TMax_m1
       
       ! this takes data from n_t_global and gets values at n_t_global + 1
       DO i_turb = 1,NumTurbines
-
+        Turbine(i_turb)%YawCntDat%Strategy = YawControlStrategy
+        Turbine(i_turb)%YawCntDat%YawErrorDelta = InYawErrorDelta
+        Turbine(i_turb)%YawCntDat%WindDelta = InWindDelta
          CALL FAST_Solution_T( t_initial, n_t_global, Turbine(i_turb), ErrStat, ErrMsg )
             CALL CheckError( ErrStat, ErrMsg  )
                                    

@@ -1870,7 +1870,7 @@ END SUBROUTINE SrvD_End
 !----------------------------------------------------------------------------------------------------------------------------------
 !> This is a loose coupling routine for solving constraint states, integrating continuous states, and updating discrete and other
 !! states. Continuous, constraint, discrete, and other states are updated to values at t + Interval.
-SUBROUTINE SrvD_UpdateStates( t, n, Inputs, InputTimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg )
+SUBROUTINE SrvD_UpdateStates( t, n, Inputs, InputTimes, p, x, xd, z, OtherState, m, YawCntDat, ErrStat, ErrMsg )
 !..................................................................................................................................
 
    REAL(DbKi),                      INTENT(IN   ) :: t               !< Current simulation time in seconds
@@ -1887,6 +1887,7 @@ SUBROUTINE SrvD_UpdateStates( t, n, Inputs, InputTimes, p, x, xd, z, OtherState,
    TYPE(SrvD_OtherStateType),       INTENT(INOUT) :: OtherState      !< Other states: Other states at t;
                                                                      !!   Output: Other states at t + Interval
    TYPE(SrvD_MiscVarType),          INTENT(INOUT) :: m               !< Misc (optimization) variables
+   TYPE(YawControlData),            INTENT(IN   ) :: YawCntDat           !< Yaw control research parameters
    INTEGER(IntKi),                  INTENT(  OUT) :: ErrStat         !< Error status of the operation
    CHARACTER(*),                    INTENT(  OUT) :: ErrMsg          !< Error message if ErrStat /= ErrID_None
 
@@ -1955,7 +1956,7 @@ SUBROUTINE SrvD_UpdateStates( t, n, Inputs, InputTimes, p, x, xd, z, OtherState,
       if (Failed()) return;
       
       ! Yaw control: 
-   CALL Yaw_UpdateStates( t_next, u_interp, p, x, xd, z, OtherState, m, ErrStat2, ErrMsg2 )
+   CALL Yaw_UpdateStates( t_next, u_interp, p, x, xd, z, OtherState, m, YawCntDat, ErrStat2, ErrMsg2 )
       if (Failed()) return;
    
       ! Tip brake control:    
@@ -2166,7 +2167,7 @@ CONTAINS
 END SUBROUTINE DLL_controller_call
 !----------------------------------------------------------------------------------------------------------------------------------
 !> Routine for computing outputs, used in both loose and tight coupling.
-SUBROUTINE SrvD_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg )
+SUBROUTINE SrvD_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, YawCntDat, ErrStat, ErrMsg )
 !..................................................................................................................................
 
    REAL(DbKi),                     INTENT(IN   )  :: t           !< Current simulation time in seconds
@@ -2179,6 +2180,7 @@ SUBROUTINE SrvD_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg
    TYPE(SrvD_OutputType),          INTENT(INOUT)  :: y           !< Outputs computed at t (Input only so that mesh con-
                                                                  !!   nectivity information does not have to be recalculated)
    TYPE(SrvD_MiscVarType),         INTENT(INOUT)  :: m           !< Misc (optimization) variables
+   TYPE(YawControlData),           INTENT(IN   )  :: YawCntDat   !< Yaw control research parameters
    INTEGER(IntKi),                 INTENT(  OUT)  :: ErrStat     !< Error status of the operation
    CHARACTER(*),                   INTENT(  OUT)  :: ErrMsg      !< Error message if ErrStat /= ErrID_None
 
@@ -2236,7 +2238,7 @@ SUBROUTINE SrvD_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg
       if (Failed()) return;
 
       ! Yaw control:
-   CALL Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m,ErrStat2, ErrMsg2 )
+   CALL Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, YawCntDat, ErrStat2, ErrMsg2 )
       if (Failed()) return;
 
       ! Tip brake control:
@@ -5129,7 +5131,7 @@ SUBROUTINE SrvD_SetParameters( InputFileData, p, UnSum, ErrStat, ErrMsg )
 END SUBROUTINE SrvD_SetParameters
 !----------------------------------------------------------------------------------------------------------------------------------
 !> Routine for computing the yaw output: a yaw moment. This routine is used in both loose and tight coupling.
-SUBROUTINE Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg )
+SUBROUTINE Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, YawCntDat, ErrStat, ErrMsg )
 !..................................................................................................................................
 
    REAL(DbKi),                     INTENT(IN   )  :: t           !< Current simulation time in seconds
@@ -5142,6 +5144,7 @@ SUBROUTINE Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg 
    TYPE(SrvD_OutputType),          INTENT(INOUT)  :: y           !< Outputs computed at t (Input only so that mesh con-
                                                                  !!   nectivity information does not have to be recalculated)
    TYPE(SrvD_MiscVarType),         INTENT(INOUT)  :: m           !< Misc (optimization) variables
+   TYPE(YawControlData),           INTENT(IN   )  :: YawCntDat   !< Yaw control research parameters
    INTEGER(IntKi),                 INTENT(  OUT)  :: ErrStat     !< Error status of the operation
    CHARACTER(*),                   INTENT(  OUT)  :: ErrMsg      !< Error message if ErrStat /= ErrID_None
 
@@ -5190,7 +5193,7 @@ SUBROUTINE Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg 
       !...................................................................
 
       YawPosComInt = OtherState%YawPosComInt    ! get state value.  We don't update the state here.
-      CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt, ErrStat, ErrMsg)
+      CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt, YawCntDat, ErrStat, ErrMsg)
 
    END IF
    !...................................................................
@@ -5213,7 +5216,7 @@ SUBROUTINE Yaw_CalcOutput( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg 
 END SUBROUTINE Yaw_CalcOutput
 !----------------------------------------------------------------------------------------------------------------------------------
 !> Routine that calculates standard yaw position and rate commands: YawPosCom and YawRateCom.
-SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt, ErrStat, ErrMsg)
+SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt, YawCntDat, ErrStat, ErrMsg)
 
    REAL(DbKi),                     INTENT(IN   )  :: t            !< Current simulation time in seconds
    TYPE(SrvD_InputType),           INTENT(IN   )  :: u            !< Inputs at t
@@ -5222,6 +5225,7 @@ SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt,
    REAL(ReKi),                     INTENT(  OUT)  :: YawPosCom    !< Commanded yaw angle from user-defined routines, rad.
    REAL(ReKi),                     INTENT(  OUT)  :: YawRateCom   !< Commanded yaw rate  from user-defined routines, rad/s.
    REAL(ReKi),                     INTENT(INOUT)  :: YawPosComInt !< Internal variable that integrates the commanded yaw rate and passes it to YawPosCom
+   TYPE(YawControlData),           INTENT(IN   )  :: YawCntDat    !< Yaw control research parameters
    INTEGER(IntKi),                 INTENT(  OUT)  :: ErrStat      !< Error status of the operation
    CHARACTER(*),                   INTENT(  OUT)  :: ErrMsg       !< Error message if ErrStat /= ErrID_None
 
@@ -5243,7 +5247,7 @@ SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt,
 
          CASE ( ControlMode_USER )              ! User-defined from routine UserYawCont().
 
-            CALL UserYawCont ( u%Yaw, u%YawRate, u%WindDir, u%YawErr, p%NumBl, t, p%DT, p%PriPath, YawPosCom, YawRateCom )
+            CALL UserYawCont ( u%Yaw, u%YawRate, u%WindDir, u%YawErr, u%HorWindV, p%NumBl, t, p%DT, p%RootName, YawPosCom, YawRateCom, YawCntDat )
 
          CASE ( ControlMode_EXTERN )              ! User-defined from Simulink or LabVIEW
 
@@ -5274,7 +5278,7 @@ SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt,
 END SUBROUTINE CalculateStandardYaw
 !----------------------------------------------------------------------------------------------------------------------------------
 !> This routine updates the other states associated with the yaw controller: BegYawMan, NacYawI, and TYawManE.
-SUBROUTINE Yaw_UpdateStates( t, u, p, x, xd, z, OtherState, m, ErrStat, ErrMsg )
+SUBROUTINE Yaw_UpdateStates( t, u, p, x, xd, z, OtherState, m, YawCntDat, ErrStat, ErrMsg )
 !..................................................................................................................................
 
    REAL(DbKi),                      INTENT(IN   ) :: t           !< t+dt
@@ -5289,6 +5293,7 @@ SUBROUTINE Yaw_UpdateStates( t, u, p, x, xd, z, OtherState, m, ErrStat, ErrMsg )
    TYPE(SrvD_OtherStateType),       INTENT(INOUT) :: OtherState  !< Other states: Other states at t;
                                                                  !!   Output: Other states at t + dt
    TYPE(SrvD_MiscVarType),         INTENT(INOUT)  :: m           !< Misc (optimization) variables
+   TYPE(YawControlData),           INTENT(IN   )  :: YawCntDat   !< Yaw control research parameters
    INTEGER(IntKi),                 INTENT(  OUT)  :: ErrStat     !< Error status of the operation
    CHARACTER(*),                   INTENT(  OUT)  :: ErrMsg      !< Error message if ErrStat /= ErrID_None
 
@@ -5313,7 +5318,7 @@ SUBROUTINE Yaw_UpdateStates( t, u, p, x, xd, z, OtherState, m, ErrStat, ErrMsg )
 
       IF ( .not. OtherState%BegYawMan )  THEN  ! Override yaw maneuver is just beginning (possibly again).
 
-         CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, OtherState%YawPosComInt, ErrStat, ErrMsg)
+         CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, OtherState%YawPosComInt, YawCntDat, ErrStat, ErrMsg)
 
          OtherState%NacYawI   = YawPosCom  !bjj: was u%Yaw                                    ! Store the initial (current) yaw, at the start of the yaw maneuver
          YawManRat            = SIGN( p%YawManRat, p%NacYawF - OtherState%NacYawI )           ! Modify the sign of YawManRat based on the direction of the yaw maneuever
@@ -5328,7 +5333,7 @@ SUBROUTINE Yaw_UpdateStates( t, u, p, x, xd, z, OtherState, m, ErrStat, ErrMsg )
       !...................................................................
       ! Update OtherState%YawPosComInt:
       !...................................................................
-      CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, OtherState%YawPosComInt, ErrStat, ErrMsg)
+      CALL CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, OtherState%YawPosComInt, YawCntDat, ErrStat, ErrMsg)
 
    ENDIF
 
