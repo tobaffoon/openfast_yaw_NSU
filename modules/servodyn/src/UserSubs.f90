@@ -436,7 +436,7 @@ REAL(DbKi), INTENT(IN )      :: ZTime                                           
 TYPE(YawControlData),     INTENT(IN   ) :: YawCntDat                            ! Yaw control research parameters
 
 if (YawCntDat%Strategy == YawErrorStrat) then
-    if (ABS(YawError) >= YawCntDat%YawErrorDelta) then
+    if (ABS(YawError) >= YawCntDat%YawArg) then
         YawRateCom = YawRate
         YawPosCom = YawPos + (WindDir - YawPos) * YawRateCom * DT
     else
@@ -444,7 +444,7 @@ if (YawCntDat%Strategy == YawErrorStrat) then
         YawPosCom = YawPos
     end if
 else 
-    if (HorWindV < YawCntDat%WindDelta) then
+    if (HorWindV < YawCntDat%YawArg) then
         YawRateCom = 0.0
         YawPosCom = YawPos
     else

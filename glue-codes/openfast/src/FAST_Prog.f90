@@ -54,11 +54,8 @@ CHARACTER(20)                         :: FlagArg                                
 INTEGER(IntKi)                        :: Restart_step                            ! step to start on (for restart) 
     
     ! vars for input yaw control research parameters
-INTEGER, parameter                    :: read_unit = 99
-CHARACTER(1024), parameter            :: YawControlFile = 'yaw_control_params.dat'
-INTEGER                               :: YawControlStrategy
-real(ReKi)                            :: InYawErrorDelta = -1
-real(ReKi)                            :: InWindDelta = -1
+INTEGER                               :: YawStrategy
+real(ReKi)                            :: YawArg
 
       !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       ! determine if this is a restart from checkpoint
@@ -68,7 +65,7 @@ real(ReKi)                            :: InWindDelta = -1
    InputFile = ""
    CheckpointRoot = ""
 
-   CALL CheckArgs( InputFile, Flag=FlagArg, Arg2=CheckpointRoot )
+   CALL CheckArgs( InputFile, YawControlStrategy=YawStrategy, YawControlArg=YawArg, Flag=FlagArg, Arg2=CheckpointRoot )
 
    IF ( TRIM(FlagArg) == 'RESTART' ) THEN ! Restart from checkpoint file
       CALL FAST_RestoreFromCheckpoint_Tary(t_initial, Restart_step, Turbine, CheckpointRoot, ErrStat, ErrMsg  )
@@ -94,7 +91,7 @@ real(ReKi)                            :: InWindDelta = -1
          ! initialization
          !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          
-         CALL FAST_InitializeAll_T( t_initial, i_turb, Turbine(i_turb), ErrStat, ErrMsg )     ! bjj: we need to get the input files for each turbine (not necessarily the same one)
+         CALL FAST_InitializeAll_T( t_initial, i_turb, Turbine(i_turb), ErrStat, ErrMsg, InFile=InputFile )     ! bjj: we need to get the input files for each turbine (not necessarily the same one)
          CALL CheckError( ErrStat, ErrMsg, 'during module initialization' )
                         
       !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -124,14 +121,6 @@ real(ReKi)                            :: InWindDelta = -1
    !...............................................................................................................................
    ! Time Stepping:
    !...............................................................................................................................         
-    open(unit=read_unit, file=YawControlFile, status = 'old')
-    read(read_unit, *) YawControlStrategy
-    if (YawControlStrategy == YawErrorStrat) then
-        read(read_unit, *) InYawErrorDelta
-    else if (YawControlStrategy == WindDeltaStrat) then
-        read(read_unit, *) InWindDelta
-    end if
-    close(read_unit)
 TIME_STEP_LOOP:  DO n_t_global = Restart_step, Turbine(1)%p_FAST%n_TMax_m1 
       
       ! bjj: we have to make sure the n_TMax_m1 and n_ChkptTime are the same for all turbines or have some different logic here
@@ -152,9 +141,8 @@ TIME_STEP_LOOP:  DO n_t_global = Restart_step, Turbine(1)%p_FAST%n_TMax_m1
       
       ! this takes data from n_t_global and gets values at n_t_global + 1
       DO i_turb = 1,NumTurbines
-        Turbine(i_turb)%YawCntDat%Strategy = YawControlStrategy
-        Turbine(i_turb)%YawCntDat%YawErrorDelta = InYawErrorDelta
-        Turbine(i_turb)%YawCntDat%WindDelta = InWindDelta
+        Turbine(i_turb)%YawCntDat%Strategy = YawStrategy
+        Turbine(i_turb)%YawCntDat%YawArg = YawArg
          CALL FAST_Solution_T( t_initial, n_t_global, Turbine(i_turb), ErrStat, ErrMsg )
             CALL CheckError( ErrStat, ErrMsg  )
                                    

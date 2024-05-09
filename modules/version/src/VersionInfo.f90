@@ -156,7 +156,7 @@ END FUNCTION GetVersion
    
 !=======================================================================
 !> This subroutine checks for command-line arguments.
-   SUBROUTINE CheckArgs ( Arg1, ErrStat, Arg2, Flag, InputArgArray )
+   SUBROUTINE CheckArgs ( Arg1, ErrStat, Arg2, Flag, InputArgArray, YawControlStrategy, YawControlArg )
 
       ! Argument declarations:
    CHARACTER(*), INTENT(INOUT)           :: Arg1               !< The first non-flag argument; generally, the name of the input file.
@@ -164,15 +164,19 @@ END FUNCTION GetVersion
    CHARACTER(*), INTENT(  OUT), OPTIONAL :: Arg2               !< An optional 2nd non-flag argument.
    CHARACTER(*), INTENT(  OUT), OPTIONAL :: Flag               !< An optional flag argument; the first argument starting with a switch character. 
    CHARACTER(*), INTENT(IN   ), DIMENSION(:), OPTIONAL :: InputArgArray  !< An optional argument containing the arguments to parse; primarily used for unit testing.
+   INTEGER,      INTENT(  OUT), OPTIONAL :: YawControlStrategy !< An optional argument for yaw research. 0 = YawErrorStrat, 1 = WindDeltaStrat
+   real(ReKi),   INTENT(  OUT), OPTIONAL :: YawControlArg      !< An optional argument for yaw research. Depening on YawControlStrategy contains corresponding delta.
 
       ! Local declarations:
    INTEGER                                    :: I, J          ! Iterator variables
    CHARACTER(1024)                            :: Arg, FlagIter
    CHARACTER(1024), DIMENSION(:), ALLOCATABLE :: ArgArray, TempArray, Flags
-   LOGICAL :: FirstArgumentSet, SecondArgumentSet
+   LOGICAL :: FirstArgumentSet, SecondArgumentSet, YawStrategySet, YawArgSet
 
    FirstArgumentSet = .FALSE.
    SecondArgumentSet = .FALSE.
+   YawStrategySet = .FALSE.
+   YawArgSet = .FALSE.
                                         
    IF ( PRESENT(Arg2) ) Arg2 = ""
    IF ( PRESENT(Flag) ) Flag = ""
@@ -212,6 +216,14 @@ END FUNCTION GetVersion
       ELSE IF ( .NOT. FirstArgumentSet ) THEN
          Arg1 = TRIM(Arg)
          FirstArgumentSet = .TRUE.
+      ELSE IF ( .NOT. YawStrategySet .AND. PRESENT(YawControlStrategy)) THEN
+         Arg = TRIM(Arg)
+         read(Arg,*)  YawControlStrategy
+         YawStrategySet = .True.
+      ELSE IF ( .NOT. YawArgSet .AND. PRESENT(YawControlArg) ) THEN
+         Arg = TRIM(Arg)
+         read(Arg,*)  YawControlArg
+         YawArgSet = .True.
       ELSE IF ( .NOT. SecondArgumentSet ) THEN
          Arg2 = TRIM(Arg)
          SecondArgumentSet = .True.
@@ -227,7 +239,7 @@ END FUNCTION GetVersion
       FlagIter = Flags(I)(2:) ! This results in the flag without the switch character
       CALL Conv2UC( FlagIter )
       IF ( PRESENT(Flag) ) Flag = FlagIter
-
+      
       SELECT CASE ( TRIM(FlagIter) )
 
       CASE ('H')
@@ -291,7 +303,7 @@ END FUNCTION GetVersion
       SUBROUTINE INVALID_SYNTAX(ErrorMessage)
 
          CHARACTER(*), INTENT(IN) :: ErrorMessage
-
+         
          CALL DispCopyrightLicense( ProgName )
          CALL DispCompileRuntimeInfo( ProgName )
          CALL NWTC_DisplaySyntax( Arg1, ProgName )

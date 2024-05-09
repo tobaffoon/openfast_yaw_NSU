@@ -86,8 +86,7 @@ IMPLICIT NONE
 ! =========  YawControlData  =======
   TYPE, PUBLIC :: YawControlData
       INTEGER(IntKi)  :: Strategy
-      REAL(ReKi)  :: YawErrorDelta 
-      REAL(ReKi)  :: WindDelta 
+      REAL(ReKi)  :: YawArg 
   END TYPE YawControlData
 ! =======================
   integer, public, parameter :: YawErrorStrat = 0
