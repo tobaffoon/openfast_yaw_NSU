@@ -57,8 +57,6 @@ INTEGER(IntKi)                        :: Restart_step                           
 INTEGER, parameter                    :: read_unit = 99
 CHARACTER(1024), parameter            :: YawControlFile = 'yaw_control_params.dat'
 INTEGER                               :: YawControlStrategy
-INTEGER, parameter                    :: YawErrorStrat = 0
-INTEGER, parameter                    :: WindDeltaStrat = 1
 real(ReKi)                            :: InYawErrorDelta = -1
 real(ReKi)                            :: InWindDelta = -1
 

@@ -49,8 +49,8 @@ True          GenTiStp     - Method to stop the generator {T: timed using TimGen
         0.6   HSSBrDT      - Time for HSS-brake to reach full deployment once initiated (sec) [used only when HSSBrMode=1]
     28116.2   HSSBrTqF     - Fully deployed HSS-brake torque (N-m)
 ---------------------- NACELLE-YAW CONTROL -------------------------------------
-          0   YCMode       - Yaw control mode {0: none, 3: user-defined from routine UserYawCont, 4: user-defined from Simulink/Labview, 5: user-defined from Bladed-style DLL} (switch)
-     9999.9   TYCOn        - Time to enable active yaw control (s) [unused when YCMode=0]
+          3   YCMode       - Yaw control mode {0: none, 3: user-defined from routine UserYawCont, 4: user-defined from Simulink/Labview, 5: user-defined from Bladed-style DLL} (switch)
+		  0   TYCOn        - Time to enable active yaw control (s) [unused when YCMode=0]
           0   YawNeut      - Neutral yaw position--yaw spring force is zero at this yaw (degrees)
 9.02832E+09   YawSpr       - Nacelle-yaw spring constant (N-m/rad)
   1.916E+07   YawDamp      - Nacelle-yaw damping constant (N-m/(rad/s))
@@ -105,6 +105,5 @@ True          TabDelim     - Use tab delimiters in text tabular output file? (fl
           0   TStart       - Time to begin tabular output (s) (currently unused)
               OutList      - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
 "GenPwr"                  - Electrical generator power and torque
-"GenTq"                   - Electrical generator power and torque
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------

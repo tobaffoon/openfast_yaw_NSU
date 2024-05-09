@@ -5247,7 +5247,7 @@ SUBROUTINE CalculateStandardYaw(t, u, p, m, YawPosCom, YawRateCom, YawPosComInt,
 
          CASE ( ControlMode_USER )              ! User-defined from routine UserYawCont().
 
-            CALL UserYawCont ( u%Yaw, u%YawRate, u%WindDir, u%YawErr, u%HorWindV, p%NumBl, t, p%DT, p%RootName, YawPosCom, YawRateCom, YawCntDat )
+            CALL UserYawCont ( u%Yaw, u%YawRate, u%WindDir, u%YawErr, u%HorWindV, p%NumBl, t, p%DT, YawPosCom, YawRateCom, YawCntDat )
 
          CASE ( ControlMode_EXTERN )              ! User-defined from Simulink or LabVIEW
 

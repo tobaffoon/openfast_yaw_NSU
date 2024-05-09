@@ -90,6 +90,8 @@ IMPLICIT NONE
       REAL(ReKi)  :: WindDelta 
   END TYPE YawControlData
 ! =======================
+  integer, public, parameter :: YawErrorStrat = 0
+  integer, public, parameter :: WindDeltaStrat = 1
 CONTAINS
 
 !=======================================================================

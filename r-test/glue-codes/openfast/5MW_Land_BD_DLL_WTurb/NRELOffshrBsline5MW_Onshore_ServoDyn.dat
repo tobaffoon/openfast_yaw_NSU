@@ -105,6 +105,5 @@ True          TabDelim     - Use tab delimiters in text tabular output file? (fl
           0   TStart       - Time to begin tabular output (s) (currently unused)
               OutList      - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
 "GenPwr"                  - Electrical generator power and torque
-"GenTq"                   - Electrical generator power and torque
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------
