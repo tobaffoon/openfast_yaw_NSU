@@ -448,8 +448,8 @@ else
         YawRateCom = 0.0
         YawPosCom = YawPos
     else
-        YawRateCom = 0.0873 ! 5 deg/s
-        YawPosCom = YawPosCom + (WindDir - YawPosCom) * YawRateCom * DT
+        YawRateCom = YawRate
+        YawPosCom = YawPosCom + (WindDir - YawPos) * YawRateCom * DT
     end if
 end if
 
