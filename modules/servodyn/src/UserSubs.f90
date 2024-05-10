@@ -438,7 +438,7 @@ TYPE(YawControlData),     INTENT(IN   ) :: YawCntDat                            
 if (YawCntDat%Strategy == YawErrorStrat) then
     if (ABS(YawError) >= YawCntDat%YawArg) then
         YawRateCom = YawRate
-        YawPosCom = YawPos + (WindDir - YawPos) * YawRateCom * DT
+        YawPosCom = YawPos + ( YawPos - WindDir ) * YawRateCom * DT
     else
         YawRateCom = 0.0
         YawPosCom = YawPos
